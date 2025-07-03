@@ -25,7 +25,7 @@ class Producto(models.Model):
 
     class Meta:
         db_table = 'Producto'
-        managed = False
+        managed = True
     
 class ClienteB2C(models.Model):
     id_cliente = models.AutoField(primary_key=True)
@@ -48,7 +48,7 @@ class CompraCliente(models.Model):
 
     class Meta:
         db_table = 'compracliente'
-        managed = False  
+        managed = True  
 
     def __str__(self):
         return f"Compra #{self.id} - {self.cliente.nombre}"
@@ -67,7 +67,7 @@ class DetalleCompraCliente(models.Model):
 
     class Meta:
         db_table = 'detallecompracliente'
-        managed = False  
+        managed = True  
 
 """ Mayorista """
 class ClienteB2B(models.Model):
@@ -81,7 +81,7 @@ class ClienteB2B(models.Model):
 
     class Meta:
         db_table = 'cliente_b2b'
-        managed = False
+        managed = True
 
 class CotizacionEmpresa(models.Model):
     cliente = models.ForeignKey(ClienteB2B, on_delete=models.CASCADE, db_column='cliente_id')
@@ -91,7 +91,7 @@ class CotizacionEmpresa(models.Model):
 
     class Meta:
         db_table = 'cotizacion_empresa'
-        managed = False
+        managed = True
 
 class DetalleCotizacionEmpresa(models.Model):
     cotizacion = models.ForeignKey(CotizacionEmpresa, on_delete=models.CASCADE)
@@ -102,7 +102,7 @@ class DetalleCotizacionEmpresa(models.Model):
 
     class Meta:
         db_table = 'detalle_cotizacion_empresa'
-        managed = False
+        managed = True
         
 """ Admin """
 
@@ -114,4 +114,4 @@ class Administrador(models.Model):
 
     class Meta:
         db_table = 'administrador'
-        managed = False
+        managed = True

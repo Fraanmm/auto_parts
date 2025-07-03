@@ -1,12 +1,29 @@
+{% extends "tienda/base/base.html" %}
+{% load static %}
+{% block title %}Editar Cliente{% endblock %}
 
-{% block content %}
-<div class="container mt-4">
-  <h2>Editar Cliente B2C</h2>
+{% block contenido %}
   <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+    <label>Nombre:</label>
+    <input type="text" name="nombre" value="{{ cliente.nombre }}" required><br>
+
+    <label>Apellido:</label>
+    <input type="text" name="apellido" value="{{ cliente.apellido }}" required><br>
+
+    <label>RUT:</label>
+    <input type="text" name="rut" value="{{ cliente.rut }}" required><br>
+
+    <label>Teléfono:</label>
+    <input type="text" name="telefono" value="{{ cliente.telefono }}" required><br>
+
+    <label>Correo:</label>
+    <input type="email" name="correo" value="{{ cliente.correo }}" required><br>
+
+    <label>Contraseña:</label>
+    <input type="password" name="contrasena" value="{{ cliente.contrasena }}" required><br>
+
     <button type="submit" class="btn btn-primary">Guardar Cambios</button>
     <a href="{% url 'panel_admin' %}" class="btn btn-secondary">Cancelar</a>
   </form>
-</div>
 {% endblock %}

@@ -1,12 +1,15 @@
+{% extends "tienda/base/base.html" %}
+{% load static %}
+{% block title %}Editar Cliente{% endblock %}
 
-{% block content %}
-<div class="container mt-4">
-  <h2>Editar Cliente B2B</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-    <a href="{% url 'panel_admin' %}" class="btn btn-secondary">Cancelar</a>
-  </form>
-</div>
+{% block contenido %}
+  <div class="container mt-4">
+    <h2>Editar Cliente B2B</h2>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+      <a href="{% url 'panel_admin' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+  </div>
 {% endblock %}

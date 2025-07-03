@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect
+
+from tienda.forms import ClienteB2BForm, ProductoForm
 from .models import Administrador, ClienteB2C
 from django.contrib import messages
 from .models import ClienteB2B
@@ -1236,6 +1238,33 @@ def calcular_costo_envio(comuna_codigo, productos_carrito):
 
 """ Admin """
 
+def solo_admin(view_func):
+    def wrapper(request, *args, **kwargs):
+        if 'admin_id' not in request.session:
+            return redirect('login_admin')  # Redirige si no hay sesión admin
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+def login_admin(request):
+    if request.method == 'POST':
+        correo = request.POST.get('correo')
+        contrasena = request.POST.get('contrasena')
+
+        try:
+            admin = Administrador.objects.get(correo=correo, contrasena=contrasena)
+            request.session['admin_id'] = admin.id_admin
+            request.session['admin_nombre'] = admin.nombre
+            return redirect('panel_admin')  # 👈 Asegúrate que esta vista exista
+        except Administrador.DoesNotExist:
+            return render(request, 'tienda/login_admin.html', {'error': 'Credenciales inválidas'})
+
+    return render(request, 'tienda/login_admin.html')
+
+def logout_admin(request):
+    request.session.flush()
+    return redirect('login_admin')
+
+@solo_admin
 def panel_admin(request):
     clientes_b2c = ClienteB2C.objects.all()
     clientes_b2b = ClienteB2B.objects.all()
@@ -1249,20 +1278,7 @@ def panel_admin(request):
         'productos': productos,
     })
 
-def login_admin(request):
-    if request.method == 'POST':
-        correo = request.POST.get('correo')
-        contrasena = request.POST.get('contrasena')
-        try:
-            admin = Administrador.objects.get(correo=correo, contrasena=contrasena)
-            request.session['admin_id'] = admin.id_admin
-            request.session['admin_nombre'] = admin.nombre
-            return redirect('panel_admin')
-        except Administrador.DoesNotExist:
-            return render(request, 'tienda/loginadmin.html', {'error': 'Credenciales inválidas'})
-
-    return render(request, 'tienda/loginadmin.html')
-
+@solo_admin
 def editar_b2c(request, id):
     cliente = get_object_or_404(ClienteB2C, id_cliente=id)
     if request.method == 'POST':
@@ -1276,29 +1292,33 @@ def editar_b2c(request, id):
         return redirect('panel_admin')
     return render(request, 'tienda/editar_b2c.html', {'cliente': cliente})
 
+@solo_admin
 def eliminar_b2c(request, id):
     cliente = get_object_or_404(ClienteB2C, id_cliente=id)
     cliente.delete()
     return redirect('panel_admin')
 
+@solo_admin
 def editar_b2b(request, id):
     empresa = get_object_or_404(ClienteB2B, id_cliente_b2b=id)
+    
     if request.method == 'POST':
-        empresa.nombre_empresa = request.POST.get('nombre_empresa')
-        empresa.rut_empresa = request.POST.get('rut_empresa')
-        empresa.direccion = request.POST.get('direccion')
-        empresa.telefono = request.POST.get('telefono')
-        empresa.correo_empresa = request.POST.get('correo_empresa')
-        empresa.contrasena = request.POST.get('contrasena')
-        empresa.save()
-        return redirect('panel_admin')
-    return render(request, 'tienda/editar_b2b.html', {'empresa': empresa})
+        form = ClienteB2BForm(request.POST, instance=empresa)
+        if form.is_valid():
+            form.save()
+            return redirect('panel_admin')
+    else:
+        form = ClienteB2BForm(instance=empresa)
 
+    return render(request, 'tienda/editar_b2b.html', {'form': form})
+
+@solo_admin
 def eliminar_b2b(request, id):
     empresa = get_object_or_404(ClienteB2B, id_cliente_b2b=id)
     empresa.delete()
     return redirect('panel_admin')
 
+@solo_admin
 def editar_cotizacion(request, id):
     cotizacion = get_object_or_404(CotizacionEmpresa, id=id)
     if request.method == 'POST':
@@ -1308,27 +1328,27 @@ def editar_cotizacion(request, id):
         return redirect('panel_admin')
     return render(request, 'tienda/editar_cotizacion.html', {'cotizacion': cotizacion})
 
+@solo_admin
 def editar_producto(request, id):
     producto = get_object_or_404(Producto, id=id)
+    
     if request.method == 'POST':
-        producto.nombre = request.POST.get('nombre')
-        producto.marca = request.POST.get('marca')
-        producto.categoria = request.POST.get('categoria')
-        producto.precio = request.POST.get('precio')
-        producto.stock = request.POST.get('stock')
-        producto.url_producto = request.POST.get('url_producto')
-        producto.peso = request.POST.get('peso')
-        producto.alto = request.POST.get('alto')
-        producto.ancho = request.POST.get('ancho')
-        producto.largo = request.POST.get('largo')
-        producto.save()
-        return redirect('panel_admin')
-    return render(request, 'tienda/editar_producto.html', {'producto': producto})
+        form = ProductoForm(request.POST, instance=producto)
+        if form.is_valid():
+            form.save()
+            return redirect('panel_admin')
+    else:
+        form = ProductoForm(instance=producto)
 
+    return render(request, 'tienda/editar_producto.html', {'form': form})
+
+@solo_admin
 def eliminar_producto(request, id):
     producto = get_object_or_404(Producto, id=id)
     producto.delete()
     return redirect('panel_admin')
+
+
 
 
 

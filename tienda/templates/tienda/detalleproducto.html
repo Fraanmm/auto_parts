@@ -29,7 +29,8 @@
             <h1>{{ producto.nombre }}</h1>
             <p><strong>Marca:</strong> {{ producto.marca }}</p>
             <p><strong>Categoría:</strong> {{ producto.categoria }}</p>
-            <p><strong>Precio:</strong> ${{ producto.precio }}</p>
+            <p><strong>Precio (con IVA):</strong> ${{ producto.precio }}</p>
+            <p class="stock">Stock disponible: {{ producto.stock }}</p>
             <p class="descripcion">{{ producto.descripcion }}</p>
 
             <form method="post" action="{% url 'agregar_al_carrito' %}">

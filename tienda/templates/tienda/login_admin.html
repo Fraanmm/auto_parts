@@ -1,0 +1,155 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Catálogo - Autoparts</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"  integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'css/stilo.css' %}">
+
+</head>
+<body>
+{% include 'tienda/base/header.html' %}
+
+<div class="login-container">
+    <h2>Administrador - Iniciar Sesión</h2>
+    {% if error %}
+    <p class="error">{{ error }}</p>
+    {% endif %}
+    <form method="post">
+    {% csrf_token %}
+    <label for="correo">Correo:</label>
+    <input type="email" name="correo" required>
+
+    <label for="contrasena">Contraseña:</label>
+    <input type="password" name="contrasena" required>
+
+    <button type="submit">Ingresar</button>
+    </form>
+</div>
+
+
+
+{% include 'tienda/base/footer.html' %}
+
+
+<script>
+    let total = 0;
+    let count = 0;
+
+    function addToCart(price) {
+        total += price;
+        count += 1;
+        document.getElementById("total").innerText = total;
+        document.getElementById("cart-count").innerText = count;
+    }
+
+
+    // Modal Login
+    function abrirModal() {
+        document.getElementById("loginModal").style.display = "block";
+    }
+
+    function cerrarModal() {
+        document.getElementById("loginModal").style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        let modal = document.getElementById("loginModal");
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+   <script>
+      window.addEventListener('DOMContentLoaded', () => {
+     if (localStorage.getItem('abrirModal') === 'true') {
+      document.querySelector('.dropbtn').click(); // Simula click en botón de login
+      localStorage.removeItem('abrirModal');
+     }
+      });
+   </script>
+   <script>
+  function toggleMenu() {
+    const menu = document.getElementById("sideMenu");
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+  }
+
+  // Cerrar el menú si se hace clic fuera
+  window.onclick = function(e) {
+    const menu = document.getElementById("sideMenu");
+    if (!e.target.closest('.menu-toggle') && !e.target.closest('#sideMenu')) {
+      menu.style.display = "none";
+    }
+  };
+</script>
+<script>
+  function scrollCarrusel(id, direccion) {
+      const carrusel = document.querySelector(`#${id} .carrusel-items`);
+      const width = carrusel.clientWidth;
+      carrusel.scrollLeft += direccion * (width / 1.2);
+  }
+
+  function addToCart(price) {
+      let total = parseInt(localStorage.getItem("cartTotal") || "0");
+      let count = parseInt(localStorage.getItem("cartCount") || "0");
+
+      total += price;
+      count += 1;
+
+      localStorage.setItem("cartTotal", total);
+      localStorage.setItem("cartCount", count);
+
+      document.getElementById("cart-count").innerText = count;
+  }
+  
+</script>
+
+<script>
+function scrollCarrusel(id, direccion) {
+  const carrusel = document.getElementById(id);
+  const items = carrusel.querySelectorAll(".product-card-link");
+  const itemWidth = items[0].offsetWidth + 20; // ancho + gap
+  const scrollAmount = itemWidth * 2; // ajusta la cantidad a desplazar
+
+  if (direccion === 1) {
+    carrusel.scrollBy({ left: scrollAmount, behavior: "smooth" });
+
+    // Si estamos muy cerca del final, vuelve al inicio
+    setTimeout(() => {
+      if (carrusel.scrollLeft + carrusel.offsetWidth >= carrusel.scrollWidth - 5) {
+        carrusel.scrollTo({ left: 0, behavior: "smooth" });
+      }
+    }, 500);
+
+  } else if (direccion === -1) {
+    carrusel.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+
+    // Si estamos al inicio, salta al final
+    setTimeout(() => {
+      if (carrusel.scrollLeft <= 0) {
+        carrusel.scrollTo({ left: carrusel.scrollWidth, behavior: "smooth" });
+      }
+    }, 500);
+  }
+}
+</script>
+
+<script>
+  function moverCarrusel(direccion) {
+    const contenedor = document.getElementById('carruselDestacados');
+    const cardWidth = contenedor.querySelector('.product-card').offsetWidth + 20; // ancho + gap
+    contenedor.scrollBy({
+      left: direccion * cardWidth,
+      behavior: 'smooth'
+    });
+  }
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+
+
+</body>
+</html>

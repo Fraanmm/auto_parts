@@ -58,6 +58,7 @@ urlpatterns = [
 
 
     #Admin
+    path('login_admin/', views.login_admin, name='login_admin'),
     path('panel_admin/', views.panel_admin, name='panel_admin'),
     path('loginadmin/', views.login_admin, name='login_admin'),
     path('editar_b2c/<int:id>/', views.editar_b2c, name='editar_b2c'),
@@ -67,5 +68,7 @@ urlpatterns = [
     path('editar_cotizacion/<int:id>/', views.editar_cotizacion, name='editar_cotizacion'),
     path('editar_producto/<int:id>/', views.editar_producto, name='editar_producto'),
     path('eliminar_producto/<int:id>/', views.eliminar_producto, name='eliminar_producto'),
+
+    path('logout_admin/', views.logout_admin, name='logout_admin'),
 
 ]
