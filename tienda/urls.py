@@ -30,7 +30,7 @@ urlpatterns = [
     path('informacion/<str:seccion>/', views.mostrar_informacion, name='mostrar_informacion'),
     path('ver_comunas/', views.ver_comunas_chilexpress, name='ver_comunas'),
     path('ver_regiones/', views.ver_regiones_disponibles, name='ver_regiones'),
-    path('vaciar-carrito/', views.vaciar_carrito, name='vaciar_carrito'),
+    #path('vaciar-carrito/', views.vaciar_carrito, name='vaciar_carrito'),
     path('eliminar-item-carrito/', views.eliminar_item_carrito, name='eliminar_item_carrito'),
 
 

@@ -29,6 +29,7 @@ import re
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 
+
 def home(request):
     productos_destacados = Producto.objects.all()[:12]
     return render(request, 'tienda/home.html', {'productos_destacados': productos_destacados})
@@ -269,6 +270,13 @@ def catalogo_b2c(request):
     }
 
     return render(request, 'tienda/catalogo_b2c.html', context)
+
+@csrf_exempt
+def vaciar_carrito(request):
+    if 'carrito_b2c' in request.session:
+        request.session['carrito_b2c'] = {}
+        request.session.modified = True
+    return redirect('carrito_cliente')
 
 
 @csrf_exempt
