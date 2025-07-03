@@ -1,0 +1,94 @@
+{% load static %} 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin</title>
+  <link rel="stylesheet" href="{% static 'css/panel_admin.css' %}">
+</head>
+<body>
+  {% block content %}
+  <div class="container mt-5">
+    <h2 class="mb-4">Panel Administrativo</h2>
+
+    <h4>Clientes B2C</h4>
+    <table class="table table-striped">
+      <thead>
+        <tr><th>Nombre</th><th>Correo</th><th>Acciones</th></tr>
+      </thead>
+      <tbody>
+        {% for cliente in clientes_b2c %}
+        <tr>
+          <td>{{ cliente.nombre }} {{ cliente.apellido }}</td>
+          <td>{{ cliente.correo }}</td>
+          <td>
+            <a href="{% url 'editar_b2c' cliente.id_cliente %}" class="btn btn-primary btn-sm">Editar</a>
+            <a href="{% url 'eliminar_b2c' cliente.id_cliente %}" class="btn btn-danger btn-sm">Eliminar</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h4>Clientes B2B</h4>
+    <table class="table table-striped">
+      <thead>
+        <tr><th>Empresa</th><th>Correo</th><th>Acciones</th></tr>
+      </thead>
+      <tbody>
+        {% for empresa in clientes_b2b %}
+        <tr>
+          <td>{{ empresa.nombre_empresa }}</td>
+          <td>{{ empresa.correo_empresa }}</td>
+          <td>
+            <a href="{% url 'editar_b2b' empresa.id_cliente_b2b %}" class="btn btn-primary btn-sm">Editar</a>
+            <a href="{% url 'eliminar_b2b' empresa.id_cliente_b2b %}" class="btn btn-danger btn-sm">Eliminar</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h4>Cotizaciones Empresa</h4>
+    <table class="table table-striped">
+      <thead>
+        <tr><th>ID</th><th>Empresa</th><th>Estado</th><th>Acciones</th></tr>
+      </thead>
+      <tbody>
+        {% for cot in cotizaciones %}
+        <tr>
+          <td>{{ cot.id }}</td>
+          <td>{{ cot.cliente.nombre_empresa }}</td>
+          <td>{{ cot.estado }}</td>
+          <td>
+            <a href="{% url 'editar_cotizacion' cot.id %}" class="btn btn-warning btn-sm">Editar Estado</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h4>Productos</h4>
+    <table class="table table-striped">
+      <thead>
+        <tr><th>Nombre</th><th>Precio</th><th>Stock</th><th>Acciones</th></tr>
+      </thead>
+      <tbody>
+        {% for prod in productos %}
+        <tr>
+          <td>{{ prod.nombre }}</td>
+          <td>${{ prod.precio }}</td>
+          <td>{{ prod.stock }}</td>
+          <td>
+            <a href="{% url 'editar_producto' prod.id %}" class="btn btn-success btn-sm">Editar</a>
+            <a href="{% url 'eliminar_producto' prod.id %}" class="btn btn-danger btn-sm">Eliminar</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endblock %}
+</body>
+</html>

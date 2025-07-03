@@ -103,3 +103,15 @@ class DetalleCotizacionEmpresa(models.Model):
     class Meta:
         db_table = 'detalle_cotizacion_empresa'
         managed = False
+        
+""" Admin """
+
+class Administrador(models.Model):
+    id_admin = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=100)
+    correo = models.CharField(max_length=100, unique=True)
+    contrasena = models.CharField(max_length=100)
+
+    class Meta:
+        db_table = 'administrador'
+        managed = False

@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     path('', views.home, name='home'),
     path('api/costo-envio/', views.obtener_costo_envio_carrito, name='calcular_costo_envio'),
+    path('api/productos/', views.api_productos, name='api_productos'),
 
 
     # Usuario normal
@@ -19,7 +20,6 @@ urlpatterns = [
     path('carrito_cliente/', views.carrito_cliente, name='carrito_cliente'),
     path('simular_pago/', views.simular_pago, name='simular_pago'),
     path('generar_compra/', views.generar_compra, name='generar_compra'),
-    path('perfil_cliente/', views.perfil_cliente, name='perfil_cliente'),
     path('boleta/<int:id>/', views.descargar_boleta, name='boleta_pdf'),
     path('procesar_compra/', views.procesar_compra_cliente, name='procesar_compra'),
     path('detalleproducto/<int:id>/', views.detalle_producto, name='detalle_producto'),
@@ -54,8 +54,18 @@ urlpatterns = [
     path('generar_cotizacion_empresa/', views.generar_cotizacion_empresa, name='generar_cotizacion_empresa'),
     path('mis_cotizaciones_empresa/', views.mis_cotizaciones_empresa, name='mis_cotizaciones_empresa'),
     path('descargar_cotizacion/<int:id>/', views.descargar_cotizacion_pdf, name='descargar_cotizacion_pdf'),
-    
+    path('seguimiento_empresa/', views.seguimiento_empresa, name='seguimiento_empresa'),
 
-    
+
+    #Admin
+    path('panel_admin/', views.panel_admin, name='panel_admin'),
+    path('loginadmin/', views.login_admin, name='login_admin'),
+    path('editar_b2c/<int:id>/', views.editar_b2c, name='editar_b2c'),
+    path('eliminar_b2c/<int:id>/', views.eliminar_b2c, name='eliminar_b2c'),
+    path('editar_b2b/<int:id>/', views.editar_b2b, name='editar_b2b'),
+    path('eliminar_b2b/<int:id>/', views.eliminar_b2b, name='eliminar_b2b'),
+    path('editar_cotizacion/<int:id>/', views.editar_cotizacion, name='editar_cotizacion'),
+    path('editar_producto/<int:id>/', views.editar_producto, name='editar_producto'),
+    path('admin/eliminar_producto/<int:id>/', views.eliminar_producto, name='eliminar_producto'),
 
 ]

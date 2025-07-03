@@ -1,0 +1,19 @@
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Editar Estado de Cotización</h2>
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <label for="estado">Estado:</label>
+      <select name="estado" class="form-control">
+        <option value="Pendiente" {% if cotizacion.estado == "Pendiente" %}selected{% endif %}>Pendiente</option>
+        <option value="Aprobada" {% if cotizacion.estado == "Aprobada" %}selected{% endif %}>Aprobada</option>
+        <option value="Rechazada" {% if cotizacion.estado == "Rechazada" %}selected{% endif %}>Rechazada</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Actualizar</button>
+    <a href="{% url 'panel_admin' %}" class="btn btn-secondary">Cancelar</a>
+  </form>
+</div>
+{% endblock %}

@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import ClienteB2C
+from .models import Administrador, ClienteB2C
 from django.contrib import messages
 from .models import ClienteB2B
 from .models import Producto
@@ -28,6 +28,10 @@ import math
 import re
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from django.contrib.admin.views.decorators import staff_member_required
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .serializers import ProductoSerializer
 
 
 def home(request):
@@ -847,6 +851,22 @@ def agregar_al_carrito_empresa(request):
         request.session['carrito_empresa'] = carrito
         return redirect('catalogo_empresa')
 
+
+def seguimiento_empresa(request):
+    if 'mayorista_id' not in request.session:
+        return redirect('loginmayorista')
+
+    cotizaciones_aprobadas = CotizacionEmpresa.objects.filter(
+        cliente_id=request.session['mayorista_id'],
+        estado__iexact='Aprobado'
+    ).order_by('-fecha')
+
+    return render(request, 'tienda/seguimiento_empresa.html', {
+        'cotizaciones': cotizaciones_aprobadas
+    })
+
+
+
 def generar_cotizacion_empresa(request):
     if 'mayorista_id' not in request.session:
         return redirect('loginmayorista')
@@ -1214,5 +1234,107 @@ def calcular_costo_envio(comuna_codigo, productos_carrito):
             aumento = int(costo_base * 0.05 * kilos_extras)
             return costo_base + aumento
 
+""" Admin """
+
+def panel_admin(request):
+    clientes_b2c = ClienteB2C.objects.all()
+    clientes_b2b = ClienteB2B.objects.all()
+    cotizaciones = CotizacionEmpresa.objects.all()
+    productos = Producto.objects.all()
+
+    return render(request, 'tienda/panel_admin.html', {
+        'clientes_b2c': clientes_b2c,
+        'clientes_b2b': clientes_b2b,
+        'cotizaciones': cotizaciones,
+        'productos': productos,
+    })
+
+def login_admin(request):
+    if request.method == 'POST':
+        correo = request.POST.get('correo')
+        contrasena = request.POST.get('contrasena')
+        try:
+            admin = Administrador.objects.get(correo=correo, contrasena=contrasena)
+            request.session['admin_id'] = admin.id_admin
+            request.session['admin_nombre'] = admin.nombre
+            return redirect('panel_admin')
+        except Administrador.DoesNotExist:
+            return render(request, 'tienda/loginadmin.html', {'error': 'Credenciales inválidas'})
+
+    return render(request, 'tienda/loginadmin.html')
+
+def editar_b2c(request, id):
+    cliente = get_object_or_404(ClienteB2C, id_cliente=id)
+    if request.method == 'POST':
+        cliente.nombre = request.POST.get('nombre')
+        cliente.apellido = request.POST.get('apellido')
+        cliente.rut = request.POST.get('rut')
+        cliente.telefono = request.POST.get('telefono')
+        cliente.correo = request.POST.get('correo')
+        cliente.contrasena = request.POST.get('contrasena')
+        cliente.save()
+        return redirect('panel_admin')
+    return render(request, 'tienda/editar_b2c.html', {'cliente': cliente})
+
+def eliminar_b2c(request, id):
+    cliente = get_object_or_404(ClienteB2C, id_cliente=id)
+    cliente.delete()
+    return redirect('panel_admin')
+
+def editar_b2b(request, id):
+    empresa = get_object_or_404(ClienteB2B, id_cliente_b2b=id)
+    if request.method == 'POST':
+        empresa.nombre_empresa = request.POST.get('nombre_empresa')
+        empresa.rut_empresa = request.POST.get('rut_empresa')
+        empresa.direccion = request.POST.get('direccion')
+        empresa.telefono = request.POST.get('telefono')
+        empresa.correo_empresa = request.POST.get('correo_empresa')
+        empresa.contrasena = request.POST.get('contrasena')
+        empresa.save()
+        return redirect('panel_admin')
+    return render(request, 'tienda/editar_b2b.html', {'empresa': empresa})
+
+def eliminar_b2b(request, id):
+    empresa = get_object_or_404(ClienteB2B, id_cliente_b2b=id)
+    empresa.delete()
+    return redirect('panel_admin')
+
+def editar_cotizacion(request, id):
+    cotizacion = get_object_or_404(CotizacionEmpresa, id=id)
+    if request.method == 'POST':
+        nuevo_estado = request.POST.get('estado')
+        cotizacion.estado = nuevo_estado
+        cotizacion.save()
+        return redirect('panel_admin')
+    return render(request, 'tienda/editar_cotizacion.html', {'cotizacion': cotizacion})
+
+def editar_producto(request, id):
+    producto = get_object_or_404(Producto, id=id)
+    if request.method == 'POST':
+        producto.nombre = request.POST.get('nombre')
+        producto.marca = request.POST.get('marca')
+        producto.categoria = request.POST.get('categoria')
+        producto.precio = request.POST.get('precio')
+        producto.stock = request.POST.get('stock')
+        producto.url_producto = request.POST.get('url_producto')
+        producto.peso = request.POST.get('peso')
+        producto.alto = request.POST.get('alto')
+        producto.ancho = request.POST.get('ancho')
+        producto.largo = request.POST.get('largo')
+        producto.save()
+        return redirect('panel_admin')
+    return render(request, 'tienda/editar_producto.html', {'producto': producto})
+
+def eliminar_producto(request, id):
+    producto = get_object_or_404(Producto, id=id)
+    producto.delete()
+    return redirect('panel_admin')
 
 
+
+""" Api externa Isa """
+@api_view(['GET'])
+def api_productos(request):
+    productos = Producto.objects.all()
+    serializer = ProductoSerializer(productos, many=True)
+    return Response(serializer.data)
