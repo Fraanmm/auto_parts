@@ -271,6 +271,17 @@ def catalogo_b2c(request):
     return render(request, 'tienda/catalogo_b2c.html', context)
 
 
+@csrf_exempt
+def eliminar_item_carrito(request):
+    if request.method == 'POST':
+        producto_id = request.POST.get('producto_id')
+        carrito = request.session.get('carrito_b2c', {})
+        if producto_id in carrito:
+            del carrito[producto_id]
+            request.session['carrito_b2c'] = carrito
+            request.session.modified = True
+    return redirect('carrito_cliente')
+
 def catalogo_por_marca(request, nombre):
     productos = Producto.objects.filter(marca=nombre)
     categorias = Producto.objects.values_list('categoria', flat=True).distinct()
