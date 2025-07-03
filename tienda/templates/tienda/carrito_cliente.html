@@ -11,6 +11,8 @@
 
 <h1>Tu carrito</h1>
 
+<a href="{% url 'catalogo_b2c' %}" class="btn btn-secondary">← Volver al Catálogo</a>
+
 {% if items %}
     <table>
         <thead>
@@ -18,6 +20,7 @@
                 <th>Producto</th>
                 <th>Cantidad</th>
                 <th>Subtotal</th>
+                <th>Eliminar</th>
             </tr>
         </thead>
         <tbody>
@@ -26,6 +29,13 @@
                 <td>{{ item.producto.nombre }}</td>
                 <td>{{ item.cantidad }}</td>
                 <td>${{ item.subtotal }}</td>
+                <td>
+                    <form method="POST" action="{% url 'eliminar_item_carrito' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="producto_id" value="{{ item.producto.id }}">
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
@@ -143,8 +153,8 @@
 
 {% else %}
     <p>Tu carrito está vacío.</p>
+    <a href="{% url 'catalogo_b2c' %}" class="btn btn-primary">Volver al Catálogo</a>
 {% endif %}
 
 </body>
 </html>
-

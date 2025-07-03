@@ -30,6 +30,8 @@ urlpatterns = [
     path('informacion/<str:seccion>/', views.mostrar_informacion, name='mostrar_informacion'),
     path('ver_comunas/', views.ver_comunas_chilexpress, name='ver_comunas'),
     path('ver_regiones/', views.ver_regiones_disponibles, name='ver_regiones'),
+    path('vaciar-carrito/', views.vaciar_carrito, name='vaciar_carrito'),
+    path('eliminar-item-carrito/', views.eliminar_item_carrito, name='eliminar_item_carrito'),
 
 
 
@@ -52,7 +54,7 @@ urlpatterns = [
     path('generar_cotizacion_empresa/', views.generar_cotizacion_empresa, name='generar_cotizacion_empresa'),
     path('mis_cotizaciones_empresa/', views.mis_cotizaciones_empresa, name='mis_cotizaciones_empresa'),
     path('descargar_cotizacion/<int:id>/', views.descargar_cotizacion_pdf, name='descargar_cotizacion_pdf'),
-
+    
 
     
 
