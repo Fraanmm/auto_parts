@@ -144,4 +144,9 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",  # alternativo para entorno local
     "http://127.0.0.1:8000",
 ]
-     
+
+# Configuración de Chilexpress
+CHILEXPRESS_API_KEY = "8bceb0c7f1e4448a9980a5047447285e"
+CHILEXPRESS_BASE_URL = "http://testservices.wschilexpress.com"
+
+

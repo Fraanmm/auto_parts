@@ -173,10 +173,14 @@ def carrito_cliente(request):
     requiere_envio = request.session.get('requiere_envio', False)
     costo_envio = 0
 
-    # ✅ Aquí calculamos costo si hay comuna guardada en sesión
+    # ✅ Usar API real de ChileExpress si hay comuna guardada
     if requiere_envio and request.session.get('comuna_envio'):
         comuna_codigo = request.session['comuna_envio']
-        costo_envio = obtener_costo_envio_chilexpress(comuna_codigo)
+        try:
+            costo_envio = obtener_costo_envio_chilexpress_real(comuna_codigo, carrito)
+        except Exception as e:
+            print(f"Error calculando envío: {e}")
+            costo_envio = 0
 
     return render(request, 'tienda/carrito_cliente.html', {
         'items': items,
@@ -187,7 +191,49 @@ def carrito_cliente(request):
         'requiere_envio': requiere_envio
     })
 
+def obtener_costo_envio_chilexpress_real(comuna_codigo, carrito):
+    """
+    Función auxiliar para calcular costo usando API real
+    """
+    productos = Producto.objects.filter(id__in=carrito.keys())
+    
+    peso_total = 0.0
+    alto_max = ancho_max = largo_max = 0.0
+    
+    for producto in productos:
+        cantidad = carrito[str(producto.id)]
+        peso_total += (float(producto.peso) or 0) * cantidad
+        alto_max = max(alto_max, float(producto.alto) or 10)
+        ancho_max = max(ancho_max, float(producto.ancho) or 10)
+        largo_max = max(largo_max, float(producto.largo) or 10)
 
+    url = "http://testservices.wschilexpress.com/rating/api/v1.0/rates/courier"
+    headers = {
+        "Ocp-Apim-Subscription-Key": "8bceb0c7f1e4448a9980a5047447285e",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "originCountyCode": "QN",
+        "destinationCountyCode": comuna_codigo,
+        "package": {
+            "weight": peso_total,
+            "height": alto_max,
+            "width": ancho_max,
+            "length": largo_max
+        },
+        "productType": 3,
+        "deliveryTime": 1
+    }
+
+    response = requests.post(url, headers=headers, json=payload, timeout=10)
+    
+    if response.status_code == 200:
+        data = response.json()
+        if isinstance(data, list) and len(data) > 0 and 'totalValue' in data[0]:
+            return int(data[0]['totalValue'])
+    
+    raise Exception(f"Error API ChileExpress: {response.status_code}")
 
 def catalogo_b2c(request):
     categoria = request.GET.get('categoria')
@@ -596,71 +642,69 @@ def mostrar_informacion(request, seccion):
             """
         },
         "sobre-cyberday": {
-    "titulo": "CyberDay",
-    "contenido": """
-    <p><strong>CyberDay</strong> es uno de los eventos de descuentos más importantes del año en Autoparts. Durante estos días, podrás acceder a ofertas únicas en repuestos, lubricantes, accesorios y mucho más.</p>
-    <ul>
-        <li>Descuentos de hasta un 50% en productos seleccionados.</li>
-        <li>Ofertas válidas solo por 72 horas o hasta agotar stock.</li>
-        <li>Promociones exclusivas para compras online.</li>
-        <li>Medios de pago habilitados: Webpay, Mercado Pago y transferencias.</li>
-    </ul>
-    <p>¡Prepárate y aprovecha las mejores oportunidades para mantener tu vehículo en óptimas condiciones!</p>
-    """
-},
-"sobre-cybermonday": {
-    "titulo": "CyberMonday",
-    "contenido": """
-    <p><strong>CyberMonday</strong> en Autoparts es el evento ideal para quienes buscan equipar su auto con productos de calidad a precios rebajados.</p>
-    <ul>
-        <li>Envíos gratis en compras superiores a $50.000.</li>
-        <li>Acceso anticipado para clientes registrados.</li>
-        <li>Ofertas flash renovadas cada 12 horas.</li>
-        <li>Stock garantizado y reposición constante durante el evento.</li>
-    </ul>
-    <p>No pierdas la oportunidad de renovar tus repuestos y accesorios con grandes descuentos.</p>
-    """
-},
-"sobre-blackfriday": {
-    "titulo": "Black Friday",
-    "contenido": """
-    <p>En <strong>Black Friday</strong>, Autoparts lanza sus precios más bajos del año. Es el momento perfecto para adquirir todo lo que necesitas para tu auto, antes de las vacaciones o el verano.</p>
-    <ul>
-        <li>Combos especiales y kits de mantenimiento con descuentos extra.</li>
-        <li>Ofertas exclusivas en productos premium: Philips, Bosch, Valeo y más.</li>
-        <li>Precios válidos solo por 48 horas.</li>
-        <li>Todos los pedidos incluyen seguimiento y embalaje seguro.</li>
-    </ul>
-    <p>¡Conecta tu pasión por los autos con la oportunidad perfecta de ahorrar!</p>
-    """
-},
-"sobre-mayoristas": {
-    "titulo": "AutoParts Mayoristas",
-    "contenido": """
-    <p>En Autoparts, ofrecemos atención especializada para <strong>mayoristas, talleres y flotas</strong> que buscan soluciones confiables y precios competitivos.</p>
-    <ul>
-        <li>Catálogo exclusivo con productos técnicos y de alta rotación.</li>
-        <li>Asesoría personalizada para compras por volumen.</li>
-        <li>Opciones de pago flexibles y descuentos por cantidad.</li>
-        <li>Facturación directa, despacho programado y soporte postventa.</li>
-    </ul>
-    <p>Contáctanos si eres empresa, mecánico independiente o distribuidor y accede a beneficios únicos.</p>
-    """
-},
-"sobre-tienda": {
-    "titulo": "Nuestra Tienda",
-    "contenido": """
-    <p>Visítanos en nuestra sucursal de <strong>Diez de Julio 711, Santiago Centro</strong>, donde encontrarás repuestos, lubricantes, baterías y más.</p>
-    <ul>
-        <li>Asesoría personalizada por expertos.</li>
-        <li>Instalación básica gratuita de baterías.</li>
-        <li>Horario: Lunes a Sábado de 9:30 a 18:30 hrs.</li>
-    </ul>
-    <p>Te esperamos con las mejores marcas del mercado y atención confiable.</p>
-    """
-}
-
-
+            "titulo": "CyberDay",
+            "contenido": """
+            <p><strong>CyberDay</strong> es uno de los eventos de descuentos más importantes del año en Autoparts. Durante estos días, podrás acceder a ofertas únicas en repuestos, lubricantes, accesorios y mucho más.</p>
+            <ul>
+                <li>Descuentos de hasta un 50% en productos seleccionados.</li>
+                <li>Ofertas válidas solo por 72 horas o hasta agotar stock.</li>
+                <li>Promociones exclusivas para compras online.</li>
+                <li>Medios de pago habilitados: Webpay, Mercado Pago y transferencias.</li>
+            </ul>
+            <p>¡Prepárate y aprovecha las mejores oportunidades para mantener tu vehículo en óptimas condiciones!</p>
+            """
+        },
+        "sobre-cybermonday": {
+            "titulo": "CyberMonday",
+            "contenido": """
+            <p><strong>CyberMonday</strong> en Autoparts es el evento ideal para quienes buscan equipar su auto con productos de calidad a precios rebajados.</p>
+            <ul>
+                <li>Envíos gratis en compras superiores a $50.000.</li>
+                <li>Acceso anticipado para clientes registrados.</li>
+                <li>Ofertas flash renovadas cada 12 horas.</li>
+                <li>Stock garantizado y reposición constante durante el evento.</li>
+            </ul>
+            <p>No pierdas la oportunidad de renovar tus repuestos y accesorios con grandes descuentos.</p>
+            """
+        },
+        "sobre-blackfriday": {
+            "titulo": "Black Friday",
+            "contenido": """
+            <p>En <strong>Black Friday</strong>, Autoparts lanza sus precios más bajos del año. Es el momento perfecto para adquirir todo lo que necesitas para tu auto, antes de las vacaciones o el verano.</p>
+            <ul>
+                <li>Combos especiales y kits de mantenimiento con descuentos extra.</li>
+                <li>Ofertas exclusivas en productos premium: Philips, Bosch, Valeo y más.</li>
+                <li>Precios válidos solo por 48 horas.</li>
+                <li>Todos los pedidos incluyen seguimiento y embalaje seguro.</li>
+            </ul>
+            <p>¡Conecta tu pasión por los autos con la oportunidad perfecta de ahorrar!</p>
+            """
+        },
+        "sobre-mayoristas": {
+            "titulo": "AutoParts Mayoristas",
+            "contenido": """
+            <p>En Autoparts, ofrecemos atención especializada para <strong>mayoristas, talleres y flotas</strong> que buscan soluciones confiables y precios competitivos.</p>
+            <ul>
+                <li>Catálogo exclusivo con productos técnicos y de alta rotación.</li>
+                <li>Asesoría personalizada para compras por volumen.</li>
+                <li>Opciones de pago flexibles y descuentos por cantidad.</li>
+                <li>Facturación directa, despacho programado y soporte postventa.</li>
+            </ul>
+            <p>Contáctanos si eres empresa, mecánico independiente o distribuidor y accede a beneficios únicos.</p>
+            """
+        },
+        "sobre-tienda": {
+            "titulo": "Nuestra Tienda",
+            "contenido": """
+            <p>Visítanos en nuestra sucursal de <strong>Diez de Julio 711, Santiago Centro</strong>, donde encontrarás repuestos, lubricantes, baterías y más.</p>
+            <ul>
+                <li>Asesoría personalizada por expertos.</li>
+                <li>Instalación básica gratuita de baterías.</li>
+                <li>Horario: Lunes a Sábado de 9:30 a 18:30 hrs.</li>
+            </ul>
+            <p>Te esperamos con las mejores marcas del mercado y atención confiable.</p>
+            """
+        }
     }
 
     datos = contenido_info.get(seccion, {
@@ -957,7 +1001,7 @@ def obtener_codigos_comunas_chilexpress():
 
 
 def obtener_costo_envio_chilexpress(comuna_destino_codigo, peso_kg=1):
-    url = "http://testservices.wschilexpress.com/rating/api/v1/rates/courier"
+    url = "http://testservices.wschilexpress.com/rating/api/v1.0/rates/courier"
     headers = {
         "Ocp-Apim-Subscription-Key": "8bceb0c7f1e4448a9980a5047447285e",
         "Content-Type": "application/json"
@@ -984,8 +1028,6 @@ def obtener_costo_envio_chilexpress(comuna_destino_codigo, peso_kg=1):
     return 0
 
 
-
-
 def ver_comunas_chilexpress(request):
     comunas = obtener_codigos_comunas_chilexpress()
     html = "<h2>Listado de Comunas con cobertura (tipo=A)</h2><ul>"
@@ -994,36 +1036,164 @@ def ver_comunas_chilexpress(request):
     html += "</ul>"
     return HttpResponse(html)
 
+def calcular_costo_simulado(peso_total):
+    """
+    Calcula el costo de envío simulado basado en el peso total
+    """
+    costo_base = 5990
+    if peso_total <= 1:
+        return costo_base
+    else:
+        kilos_extras = math.ceil(peso_total - 1)
+        aumento = int(costo_base * 0.05 * kilos_extras)
+        return costo_base + aumento
+
 @csrf_exempt
 def obtener_costo_envio_carrito(request):
+    print(f"🔍 DEBUG - Método: {request.method}")
+    
     try:
+        print(f"🔍 DEBUG - Request body: {request.body}")
         body = json.loads(request.body)
         comuna_codigo = body.get('comuna')
+        print(f"🔍 DEBUG - Comuna código: {comuna_codigo}")
 
         if not comuna_codigo:
+            print("❌ DEBUG - Comuna no especificada")
             return JsonResponse({'error': 'Comuna no especificada'}, status=400)
 
         carrito = request.session.get('carrito_b2c', {})
+        print(f"🔍 DEBUG - Carrito: {carrito}")
+        
         if not carrito:
+            print("❌ DEBUG - Carrito vacío")
             return JsonResponse({'error': 'Carrito vacío'}, status=400)
 
         productos = Producto.objects.filter(id__in=carrito.keys())
+        print(f"🔍 DEBUG - Productos encontrados: {productos.count()}")
 
+        # Calcular dimensiones del paquete
         peso_total = 0.0
+        alto_max = ancho_max = largo_max = 0.0
+        
         for producto in productos:
             cantidad = carrito[str(producto.id)]
+            print(f"🔍 DEBUG - Producto {producto.nombre}: peso={producto.peso}, cantidad={cantidad}")
             peso_total += (float(producto.peso) or 0) * cantidad
+            alto_max = max(alto_max, float(producto.alto) or 10)
+            ancho_max = max(ancho_max, float(producto.ancho) or 10)
+            largo_max = max(largo_max, float(producto.largo) or 10)
 
-        # 🔢 Reglas
+        print(f"🔍 DEBUG - Peso total: {peso_total}, Dimensiones: {alto_max}x{ancho_max}x{largo_max}")
+
+        # Usar API real de ChileExpress
+        url = "http://testservices.wschilexpress.com/rating/api/v1.0/rates/courier"
+        headers = {
+            "Ocp-Apim-Subscription-Key": "8bceb0c7f1e4448a9980a5047447285e",
+            "Content-Type": "application/json"
+        }
+
+        payload = {
+            "originCountyCode": "QN",  # Santiago
+            "destinationCountyCode": comuna_codigo,
+            "package": {
+                "weight": peso_total,
+                "height": alto_max,
+                "width": ancho_max,
+                "length": largo_max
+            },
+            "productType": 3,
+            "deliveryTime": 1
+        }
+
+        print(f"🔍 DEBUG - Payload: {payload}")
+
+        response = requests.post(url, headers=headers, json=payload, timeout=10)
+        print(f"🔍 DEBUG - Response status: {response.status_code}")
+        print(f"🔍 DEBUG - Response text: {response.text}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            print(f"🔍 DEBUG - Response data: {data}")
+            if isinstance(data, list) and len(data) > 0 and 'totalValue' in data[0]:
+                costo_envio = int(data[0]['totalValue'])
+                print(f"✅ DEBUG - Costo calculado: {costo_envio}")
+                return JsonResponse({'costo_envio': costo_envio})
+            else:
+                print(f"❌ DEBUG - Respuesta inválida: {data}")
+                # Usar cálculo simulado como fallback
+                costo_fallback = calcular_costo_simulado(peso_total)
+                print(f"🔄 DEBUG - Usando cálculo simulado: {costo_fallback}")
+                return JsonResponse({'costo_envio': costo_fallback})
+        else:
+            print(f"❌ DEBUG - Error HTTP: {response.status_code} - {response.text}")
+            # Usar cálculo simulado como fallback
+            costo_fallback = calcular_costo_simulado(peso_total)
+            print(f"🔄 DEBUG - Usando cálculo simulado por error API: {costo_fallback}")
+            return JsonResponse({'costo_envio': costo_fallback})
+
+    except json.JSONDecodeError as e:
+        print(f"❌ DEBUG - Error JSON: {e}")
+        # Usar cálculo simulado como fallback
+        carrito = request.session.get('carrito_b2c', {})
+        productos = Producto.objects.filter(id__in=carrito.keys())
+        peso_total = sum([(float(p.peso) or 0) * carrito[str(p.id)] for p in productos])
+        costo_fallback = calcular_costo_simulado(peso_total)
+        return JsonResponse({'costo_envio': costo_fallback})
+    except requests.exceptions.Timeout:
+        print("❌ DEBUG - Timeout en API ChileExpress")
+        # Usar cálculo simulado como fallback
+        carrito = request.session.get('carrito_b2c', {})
+        productos = Producto.objects.filter(id__in=carrito.keys())
+        peso_total = sum([(float(p.peso) or 0) * carrito[str(p.id)] for p in productos])
+        costo_fallback = calcular_costo_simulado(peso_total)
+        return JsonResponse({'costo_envio': costo_fallback})
+    except requests.exceptions.RequestException as e:
+        print(f"❌ DEBUG - Error de conexión: {e}")
+        # Usar cálculo simulado como fallback
+        carrito = request.session.get('carrito_b2c', {})
+        productos = Producto.objects.filter(id__in=carrito.keys())
+        peso_total = sum([(float(p.peso) or 0) * carrito[str(p.id)] for p in productos])
+        costo_fallback = calcular_costo_simulado(peso_total)
+        return JsonResponse({'costo_envio': costo_fallback})
+    except Exception as e:
+        print(f"❌ DEBUG - Error general: {e}")
+        import traceback
+        print(f"❌ DEBUG - Traceback: {traceback.format_exc()}")
+        # Usar cálculo simulado como fallback
+        carrito = request.session.get('carrito_b2c', {})
+        productos = Producto.objects.filter(id__in=carrito.keys())
+        peso_total = sum([(float(p.peso) or 0) * carrito[str(p.id)] for p in productos])
+        costo_fallback = calcular_costo_simulado(peso_total)
+        return JsonResponse({'costo_envio': costo_fallback})
+
+def calcular_costo_envio(comuna_codigo, productos_carrito):
+    """
+    Calcula el costo de envío usando ChileExpress API con fallback
+    """
+    try:
+        # Intentar con API real
+        costo_envio = obtener_costo_envio_chilexpress_real(comuna_codigo, productos_carrito)
+        return costo_envio
+    except Exception as e:
+        print(f"Error con API real: {e}")
+        
+        # Fallback a cálculo simple
+        productos = Producto.objects.filter(id__in=productos_carrito.keys())
+        peso_total = 0.0
+        
+        for producto in productos:
+            cantidad = productos_carrito[str(producto.id)]
+            peso_total += (float(producto.peso) or 0) * cantidad
+        
+        # Cálculo simulado
         costo_base = 5990
         if peso_total <= 1:
-            costo_envio = costo_base
+            return costo_base
         else:
             kilos_extras = math.ceil(peso_total - 1)
-            aumento = costo_base * 0.05 * kilos_extras
-            costo_envio = int(round(costo_base + aumento))
+            aumento = int(costo_base * 0.05 * kilos_extras)
+            return costo_base + aumento
 
-        return JsonResponse({'costo_envio': costo_envio})
 
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+
