@@ -1,32 +1,5 @@
 from django.db import models
-from django.utils import timezone
-from datetime import datetime
 
-class Producto(models.Model):
-    nombre = models.CharField(max_length=100)
-    descripcion = models.TextField(blank=True, null=True)
-    precio = models.IntegerField()
-    precio_empresa = models.IntegerField(blank=True, null=True)  # campo opcional si no se calcula dinámicamente
-    categoria = models.CharField(max_length=50, blank=True, null=True)
-    subcategoria = models.CharField(max_length=50, blank=True, null=True)
-    marca = models.CharField(max_length=50, blank=True, null=True)
-    origen = models.CharField(max_length=50, blank=True, null=True)
-    aplicacion = models.CharField(max_length=50, blank=True, null=True)
-    promocion = models.BooleanField(default=False)
-    imagen = models.CharField(max_length=255, blank=True, null=True)
-    stock = models.PositiveIntegerField(default=0)
-    peso = models.DecimalField(max_digits=50, decimal_places=2, default=1.0)
-    alto = models.DecimalField(max_digits=50, decimal_places=2, default=10.0)
-    ancho = models.DecimalField(max_digits=50, decimal_places=2, default=10.0)
-    largo = models.DecimalField(max_digits=50, decimal_places=2, default=10.0)
-
-    def __str__(self):
-        return self.nombre
-
-    class Meta:
-        db_table = 'Producto'
-        managed = True
-    
 class ClienteB2C(models.Model):
     id_cliente = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=50)
@@ -37,39 +10,9 @@ class ClienteB2C(models.Model):
     contrasena = models.CharField(max_length=128)
 
     class Meta:
-        db_table = 'cliente_b2c'
+        app_label = 'tests'
         managed = True
 
-class CompraCliente(models.Model):
-    cliente = models.ForeignKey('ClienteB2C', on_delete=models.CASCADE, db_column='id_cliente')
-    fecha = models.DateTimeField(auto_now_add=True)
-    total = models.IntegerField()
-    estado = models.CharField(max_length=50)
-
-    class Meta:
-        db_table = 'compracliente'
-        managed = True  
-
-    def __str__(self):
-        return f"Compra #{self.id} - {self.cliente.nombre}"
-
-class DetalleCompraCliente(models.Model):
-    compra = models.ForeignKey(
-        CompraCliente, 
-        on_delete=models.CASCADE, 
-        db_column='compra_id', 
-        related_name='detalles'
-    )
-    producto = models.ForeignKey('Producto', on_delete=models.CASCADE, db_column='producto_id')
-    cantidad = models.IntegerField()
-    precio_unitario = models.IntegerField()
-    subtotal = models.IntegerField()
-
-    class Meta:
-        db_table = 'detallecompracliente'
-        managed = True  
-
-""" Mayorista """
 class ClienteB2B(models.Model):
     id_cliente_b2b = models.AutoField(primary_key=True)
     nombre_empresa = models.CharField(max_length=100)
@@ -80,31 +23,8 @@ class ClienteB2B(models.Model):
     contrasena = models.CharField(max_length=128)
 
     class Meta:
-        db_table = 'cliente_b2b'
+        app_label = 'tests'
         managed = True
-
-class CotizacionEmpresa(models.Model):
-    cliente = models.ForeignKey(ClienteB2B, on_delete=models.CASCADE, db_column='cliente_id')
-    fecha = models.DateTimeField(auto_now_add=True)
-    total = models.IntegerField()
-    estado = models.CharField(max_length=50, default='Pendiente')
-
-    class Meta:
-        db_table = 'cotizacion_empresa'
-        managed = True
-
-class DetalleCotizacionEmpresa(models.Model):
-    cotizacion = models.ForeignKey(CotizacionEmpresa, on_delete=models.CASCADE)
-    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
-    cantidad = models.IntegerField()
-    precio_unitario = models.IntegerField()
-    subtotal = models.IntegerField()
-
-    class Meta:
-        db_table = 'detalle_cotizacion_empresa'
-        managed = True
-        
-""" Admin """
 
 class Administrador(models.Model):
     id_admin = models.AutoField(primary_key=True)
@@ -113,5 +33,5 @@ class Administrador(models.Model):
     contrasena = models.CharField(max_length=100)
 
     class Meta:
-        db_table = 'administrador'
+        app_label = 'tests'
         managed = True

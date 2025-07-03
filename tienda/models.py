@@ -26,6 +26,7 @@ class Producto(models.Model):
     class Meta:
         db_table = 'Producto'
         managed = False
+        app_label = 'tienda'
     
 class ClienteB2C(models.Model):
     id_cliente = models.AutoField(primary_key=True)
@@ -38,7 +39,8 @@ class ClienteB2C(models.Model):
 
     class Meta:
         db_table = 'cliente_b2c'
-        managed = True
+        managed = False
+        app_label = 'tienda'
 
 class CompraCliente(models.Model):
     cliente = models.ForeignKey('ClienteB2C', on_delete=models.CASCADE, db_column='id_cliente')
@@ -48,7 +50,8 @@ class CompraCliente(models.Model):
 
     class Meta:
         db_table = 'compracliente'
-        managed = False  
+        managed = False 
+        app_label = 'tienda' 
 
     def __str__(self):
         return f"Compra #{self.id} - {self.cliente.nombre}"
@@ -67,7 +70,8 @@ class DetalleCompraCliente(models.Model):
 
     class Meta:
         db_table = 'detallecompracliente'
-        managed = False  
+        managed = False 
+        app_label = 'tienda' 
 
 """ Mayorista """
 class ClienteB2B(models.Model):
@@ -82,6 +86,7 @@ class ClienteB2B(models.Model):
     class Meta:
         db_table = 'cliente_b2b'
         managed = False
+        app_label = 'tienda'
 
 class CotizacionEmpresa(models.Model):
     cliente = models.ForeignKey(ClienteB2B, on_delete=models.CASCADE, db_column='cliente_id')
@@ -92,6 +97,7 @@ class CotizacionEmpresa(models.Model):
     class Meta:
         db_table = 'cotizacion_empresa'
         managed = False
+        app_label = 'tienda'
 
 class DetalleCotizacionEmpresa(models.Model):
     cotizacion = models.ForeignKey(CotizacionEmpresa, on_delete=models.CASCADE)
@@ -103,6 +109,7 @@ class DetalleCotizacionEmpresa(models.Model):
     class Meta:
         db_table = 'detalle_cotizacion_empresa'
         managed = False
+        app_label = 'tienda'
         
 """ Admin """
 
@@ -115,3 +122,4 @@ class Administrador(models.Model):
     class Meta:
         db_table = 'administrador'
         managed = False
+        app_label = 'tienda'

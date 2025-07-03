@@ -81,7 +81,7 @@
             </a>
             <div class="card-body">
               <h5 class="card-title">{{ producto.nombre }}</h5>
-              <p class="card-text">Precio empresa: <strong>${{ producto.precio_con_descuento }}</strong></p>
+              <p class="card-text">Precio empresa (con IVA): <strong>${{ producto.precio_con_descuento }}</strong></p>
               <form method="POST" action="{% url 'agregar_al_carrito_empresa' %}">
                 {% csrf_token %}
                 <input type="hidden" name="producto_id" value="{{ producto.id }}">
