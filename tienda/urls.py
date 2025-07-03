@@ -66,6 +66,6 @@ urlpatterns = [
     path('eliminar_b2b/<int:id>/', views.eliminar_b2b, name='eliminar_b2b'),
     path('editar_cotizacion/<int:id>/', views.editar_cotizacion, name='editar_cotizacion'),
     path('editar_producto/<int:id>/', views.editar_producto, name='editar_producto'),
-    path('admin/eliminar_producto/<int:id>/', views.eliminar_producto, name='eliminar_producto'),
+    path('eliminar_producto/<int:id>/', views.eliminar_producto, name='eliminar_producto'),
 
 ]
