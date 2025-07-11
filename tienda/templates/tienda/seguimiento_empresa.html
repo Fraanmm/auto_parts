@@ -22,38 +22,41 @@
     </header>
 
     {% block content %}
-<div class="container mt-4">
-    <h2>Seguimiento de Pedidos (Cotizaciones Aprobadas)</h2>
-    {% if cotizaciones %}
-        <table class="table table-bordered mt-3">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Fecha</th>
-                    <th>Total</th>
-                    <th>Estado</th>
-                    <th>Seguimiento</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for cot in cotizaciones %}
-                <tr>
-                    <td>{{ cot.id }}</td>
-                    <td>{{ cot.fecha|date:"d-m-Y H:i" }}</td>
-                    <td>${{ cot.total }}</td>
-                    <td>{{ cot.estado }}</td>
-                    <td>
-                        <a href="https://seguimiento.chilexpress.cl/" target="_blank" class="btn btn-primary btn-sm">Ver seguimiento</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>No tienes cotizaciones aprobadas.</p>
-    {% endif %}
-</div>
-{% endblock %}
+    <div class="container mt-4">
+        <h2>Seguimiento de Pedidos (Cotizaciones Aprobadas)</h2>
+        {% if cotizaciones %}
+            <table class="table table-bordered mt-3">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Fecha</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th>Seguimiento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cot in cotizaciones %}
+                    <tr>
+                        <td>{{ cot.id }}</td>
+                        <td>{{ cot.fecha|date:"d-m-Y H:i" }}</td>
+                        <td>${{ cot.total }}</td>
+                        <td>{{ cot.estado }}</td>
+                        <td>
+                            <a href="https://seguimiento.chilexpress.cl/" target="_blank" class="btn btn-primary btn-sm">Ver seguimiento</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No tienes cotizaciones aprobadas.</p>
+        {% endif %}
+
+
+
+    </div>
+    {% endblock %}
 
 {% include 'tienda/base/footer.html' %}
 

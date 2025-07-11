@@ -858,10 +858,19 @@ def seguimiento_empresa(request):
     if 'mayorista_id' not in request.session:
         return redirect('loginmayorista')
 
+    mayorista_id = request.session['mayorista_id']
+
     cotizaciones_aprobadas = CotizacionEmpresa.objects.filter(
-        cliente_id=request.session['mayorista_id'],
-        estado__iexact='Aprobado'
+        Q(cliente__id_cliente_b2b=mayorista_id),
+        Q(estado__iexact='Aprobado') |
+        Q(estado__iexact='Aprovado') |
+        Q(estado__iexact='Aprobada') |
+        Q(estado__iexact='Aprovada')
     ).order_by('-fecha')
+
+    print(f"🧾 Cotizaciones encontradas: {cotizaciones_aprobadas.count()}")
+    for c in cotizaciones_aprobadas:
+        print(f" - {c.id} | {c.estado}")
 
     return render(request, 'tienda/seguimiento_empresa.html', {
         'cotizaciones': cotizaciones_aprobadas
